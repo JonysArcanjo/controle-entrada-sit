@@ -55,7 +55,7 @@ Para subir tambem o worker de impressao em modo simulado:
 docker compose --profile worker up --build
 ```
 
-O worker do Compose usa `print-worker.config.docker.json`, chama `http://app:8020/api` dentro da rede Docker e fica com `dryRun: true`. Para impressao real no macOS, prefira rodar o worker no host com `node scripts/print-worker.js print-worker.config.config.json`.
+O worker do Compose usa `print-worker.config.docker.json`, chama `http://app:8020/api` dentro da rede Docker e fica com `dryRun: true`. Para impressao real no macOS, prefira rodar o worker no host com `node scripts/print-worker.js print-worker.config.json`.
 
 ## Planilha
 
@@ -163,11 +163,13 @@ O painel admin tem um seletor de fonte:
 Google Sheets | SQLite
 ```
 
-O navegador sempre chama a API local:
+No ambiente local, o navegador chama:
 
 ```text
 http://127.0.0.1:8020/api
 ```
+
+Na VPS, os frontends devem usar o caminho relativo `/api`, que aponta para a mesma origem HTTPS da pagina.
 
 A API local decide a origem ativa:
 
@@ -274,12 +276,14 @@ O terminal de impressao deve rodar um worker local conectado as impressoras.
 cp print-worker.config.example.json print-worker.config.json
 ```
 
-2. Edite `print-worker.config.json`:
+2. Edite `print-worker.config.json`.
+
+Para a aplicacao rodando localmente:
 
 ```json
 {
-  "endpoint": "https://script.google.com/macros/s/SUA_IMPLANTACAO/exec",
-  "pollIntervalMs": 2500,
+  "endpoint": "http://127.0.0.1:8020/api",
+  "pollIntervalMs": 1000,
   "dryRun": true,
   "dryRunDelayMs": 1000,
   "printers": [
@@ -294,6 +298,31 @@ cp print-worker.config.example.json print-worker.config.json
   ]
 }
 ```
+
+Para a aplicacao na VPS publicada pelo Tailscale Funnel:
+
+```json
+{
+  "endpoint": "https://SEU_HOST.ts.net/api",
+  "pollIntervalMs": 1000,
+  "dryRun": false,
+  "dryRunDelayMs": 1000,
+  "printers": [
+    {
+      "name": "NOME_REAL_DA_IMPRESSORA_1",
+      "enabled": true
+    },
+    {
+      "name": "NOME_REAL_DA_IMPRESSORA_2",
+      "enabled": true
+    }
+  ]
+}
+```
+
+O worker sempre chama `/api` da aplicacao. Ele nao deve apontar diretamente para `script.google.com`. Quando a fonte ativa for Google Sheets, `server.py` decide quais acoes repassar ao Apps Script.
+
+Use `dryRun: false` apenas no computador conectado as impressoras reais. O nome de cada impressora deve ser exatamente o retornado pelo sistema operacional.
 
 3. Rode:
 

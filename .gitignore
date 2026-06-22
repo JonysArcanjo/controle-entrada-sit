@@ -8,6 +8,7 @@ load-test-participants-retry.txt
 AGENTS.md
 
 # Machine-specific worker configuration and secrets
+print-worker.config.json
 print-worker.config.config.json
 .env
 .env.*
