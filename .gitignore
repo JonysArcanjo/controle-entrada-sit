@@ -1,0 +1,24 @@
+# Local data and participant information
+participantes.db
+participantes.db-*
+*.db-wal
+*.db-shm
+load-test-participants.txt
+load-test-participants-retry.txt
+AGENTS.md
+
+# Machine-specific worker configuration and secrets
+print-worker.config.config.json
+.env
+.env.*
+!.env.example
+
+# Local tooling and generated files
+.DS_Store
+.superpowers/
+__pycache__/
+*.py[cod]
+node_modules/
+logs/
+test-results/
+coverage/

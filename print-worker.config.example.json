@@ -1,0 +1,16 @@
+{
+  "endpoint": "http://127.0.0.1:8020/api",
+  "pollIntervalMs": 2500,
+  "dryRun": true,
+  "dryRunDelayMs": 1000,
+  "printers": [
+    {
+      "name": "IMPRESSORA_ETIQUETA_1",
+      "enabled": true
+    },
+    {
+      "name": "IMPRESSORA_ETIQUETA_2",
+      "enabled": true
+    }
+  ]
+}

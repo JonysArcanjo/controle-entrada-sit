@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fila de Impressão</title>
+    <link rel="stylesheet" href="admin.css?v=30" />
+  </head>
+  <body class="public-queue-page">
+    <main class="public-queue-shell">
+      <header class="public-queue-hero" aria-label="Fila de impressão de crachás">
+        <div class="public-queue-title">
+          <div class="public-queue-badge-icon" aria-hidden="true">
+            <svg viewBox="0 0 64 96" role="img">
+              <path d="M18 4l14 22L46 4" />
+              <path d="M12 4l20 22L52 4" />
+              <rect x="12" y="28" width="40" height="58" rx="4" />
+              <circle cx="32" cy="50" r="8" />
+              <path d="M20 68c4-8 20-8 24 0" />
+              <path d="M22 76h20" />
+            </svg>
+          </div>
+          <div>
+            <h1>Fila de impressão</h1>
+            <span>Fila de impressão de crachás para entrada no evento</span>
+            <p><span class="public-location-icon" aria-hidden="true"></span>Inside Track Fortaleza</p>
+          </div>
+        </div>
+        <div class="public-queue-hero-art">
+          <div id="printQueueUpdatedAt" class="public-queue-updated">Atualizando...</div>
+          <div class="public-queue-skyline" aria-hidden="true">
+            <svg viewBox="0 0 520 130" preserveAspectRatio="xMidYMid meet">
+              <path d="M7 108h506" />
+              <path d="M48 108c36-32 80-32 116 0" />
+              <path d="M63 108V77m20 31V67m20 41V77m20 31V67m20 41V77" />
+              <path d="M182 108V72h24v36" />
+              <path d="M214 108V55h30v53" />
+              <path d="M252 108V64h27v44" />
+              <path d="M286 108V35h34v73" />
+              <path d="M297 35l6-17 7 17" />
+              <path d="M332 108V72h42v36" />
+              <path d="M390 108V45h36v63" />
+              <path d="M399 45l9-18 9 18" />
+              <path d="M438 108V84h30v24" />
+              <path d="M480 108V74" />
+              <path d="M465 74c16-14 30-14 46 0" />
+              <path d="M480 74c-7 10-10 22-10 34" />
+              <path d="M480 74c7 10 10 22 10 34" />
+              <path d="M238 33c12-10 24-10 36 0" />
+              <path d="M31 42c8-10 20-10 28 0 10-7 21-4 27 5" />
+              <path d="M139 31l5 3 5-3" />
+              <path d="M160 42l4 2 4-2" />
+              <path d="M485 43l5 3 5-3" />
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <section class="public-event-banner" aria-label="Inside Track Fortaleza 2026">
+        <img
+          src="assets/inside-track-fortaleza-2026.png"
+          alt="Inside Track Fortaleza 2026"
+          onerror="this.closest('.public-event-banner').hidden = true"
+        />
+      </section>
+
+      <section class="queue-section public-queue-section is-printing" aria-label="Imprimindo agora">
+        <div class="queue-section-title">
+          <span class="queue-section-icon queue-icon-printer" aria-hidden="true"></span>
+          <div>
+            <h2>Imprimindo agora</h2>
+            <p>Status do crachá que está sendo impresso no momento</p>
+          </div>
+        </div>
+        <div id="printQueuePrintingList" class="queue-list"></div>
+      </section>
+
+      <section class="queue-section queue-next-section public-queue-section is-next" aria-label="Próximos da fila">
+        <div class="queue-section-title">
+          <span class="queue-section-icon queue-icon-clock" aria-hidden="true"></span>
+          <div>
+            <h2>Próximos da fila</h2>
+            <p>Participantes aguardando impressão</p>
+          </div>
+        </div>
+        <div id="printQueueNextList" class="queue-list"></div>
+      </section>
+
+      <section class="queue-section public-queue-section is-waiting" aria-label="Fila de espera">
+        <div class="queue-section-title">
+          <span class="queue-section-icon queue-icon-users" aria-hidden="true"></span>
+          <div>
+            <h2>Fila de espera</h2>
+            <p>Participantes aguardando entrar na fila de impressão</p>
+          </div>
+        </div>
+        <div id="printQueueWaitingList" class="queue-list"></div>
+      </section>
+    </main>
+
+    <script src="fila.js?v=4"></script>
+  </body>
+</html>

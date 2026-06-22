@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel do Evento</title>
+    <link rel="stylesheet" href="admin.css?v=35" />
+  </head>
+  <body>
+    <aside class="admin-sidebar" aria-label="Navegação do admin">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo" aria-hidden="true">SIT</div>
+        <div>
+          <span>Workspace</span>
+          <strong>SIT Fortaleza</strong>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <p>Operação</p>
+        <button class="sidebar-link is-active" type="button" data-admin-view="checkin">
+          <span class="sidebar-icon">✓</span>
+          Atendimento
+        </button>
+        <button class="sidebar-link" type="button" data-admin-view="fila">
+          <span class="sidebar-icon">▦</span>
+          Fila de impressão
+        </button>
+        <button class="sidebar-link" type="button" data-admin-view="teste-impressao">
+          <span class="sidebar-icon">▶</span>
+          Teste de impressão
+        </button>
+
+        <p>Dados</p>
+        <button class="sidebar-link" type="button" data-admin-view="dados">
+          <span class="sidebar-icon">↥</span>
+          Fonte e upload
+        </button>
+        <button class="sidebar-link" type="button" data-admin-view="relatorios">
+          <span class="sidebar-icon">▤</span>
+          Relatórios
+        </button>
+      </nav>
+
+      <a class="sidebar-public-link" href="index.html">Abrir check-in público</a>
+      <a class="sidebar-public-link" href="fila.html">Abrir fila pública</a>
+    </aside>
+
+    <main class="admin-shell">
+      <header class="admin-header">
+        <button class="icon-button" type="button" aria-label="Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div>
+          <h1>Operação do evento</h1>
+          <p>Check-in, fila e impressão</p>
+        </div>
+        <button class="icon-button bell" id="refreshButton" type="button" aria-label="Atualizar painel">
+          ↻
+        </button>
+      </header>
+
+      <section class="sync-card operations-card" aria-label="Operação do evento" data-admin-panel="dados">
+        <div class="operations-title">
+          <p>Operação</p>
+          <strong>Fonte, importação e limpeza</strong>
+        </div>
+        <div class="source-switch" aria-label="Fonte de dados">
+          <button id="googleSheetsSourceButton" type="button" data-source="GOOGLE_SHEETS">Google Sheets</button>
+          <button id="sqliteSourceButton" type="button" data-source="SQLITE">SQLite</button>
+        </div>
+        <span id="dataSourceStatus">Fonte ativa: verificando...</span>
+        <button id="uploadParticipantsButton" type="button">Upload participantes</button>
+        <span id="uploadParticipantsStatus">Importe CSV/XLSX exportado do Sympla</span>
+        <button id="clearDashboardButton" type="button" class="danger-button">Limpar indicadores</button>
+        <span id="clearDashboardStatus">Remove inscritos importados e zera a fila</span>
+      </section>
+
+      <section class="workbench" data-admin-panel="checkin">
+        <div class="admin-primary-column">
+          <section class="panel-card participant-admin" id="participantAdmin">
+            <div class="card-title">
+              <h2>Check-in administrativo</h2>
+              <span>Email ou CPF</span>
+            </div>
+
+            <form id="participantSearchForm" class="admin-search-form" autocomplete="off">
+              <input
+                id="participantSearchInput"
+                type="text"
+                placeholder="Pesquisar por email ou CPF"
+                inputmode="email"
+                required
+              />
+              <button type="submit">Buscar</button>
+            </form>
+
+            <section id="participantCheckinCard" class="participant-checkin-card" hidden>
+              <div class="admin-found-banner">
+                Cadastro encontrado. Confira os dados e confirme a entrada para imprimir a etiqueta.
+              </div>
+              <div class="participant-main-info">
+                <p class="participant-kicker">Participante</p>
+                <h3 id="adminParticipantName">Nome do participante</h3>
+                <p id="adminParticipantEmail">email@exemplo.com</p>
+                <p id="adminParticipantCompany">Empresa não informada</p>
+              </div>
+              <div class="participant-edit-fields">
+                <div class="admin-field">
+                  <label for="adminBadgeNameInput">Nome para o crachá</label>
+                  <input id="adminBadgeNameInput" type="text" placeholder="Digite o nome para o crachá" />
+                </div>
+                <div class="admin-field">
+                  <label for="adminCompanyInput">Empresa</label>
+                  <input id="adminCompanyInput" type="text" placeholder="Digite a empresa" />
+                </div>
+              </div>
+              <div class="participant-meta">
+                <span>Nº <strong id="adminRaffleNumber">000</strong></span>
+                <span id="adminConfirmedAt">Sem confirmação</span>
+              </div>
+              <div class="admin-label-preview" aria-label="Prévia da etiqueta">
+                <p class="admin-label-event">SAP Inside Track Fortaleza</p>
+                <div class="admin-label-nameplate">
+                  <strong id="adminPreviewName">Nome do participante</strong>
+                  <span id="adminPreviewCompany"></span>
+                  <p class="admin-label-number">Sorteio Nº <span id="adminPreviewNumber">000</span></p>
+                </div>
+              </div>
+              <button type="button" id="adminConfirmButton" class="save-button">
+                Confirmar entrada e enviar para impressão
+              </button>
+            </section>
+
+            <p id="participantAdminMessage" class="admin-message" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+
+        <div class="admin-secondary-column">
+          <section class="summary-grid" aria-label="Resumo">
+            <article class="metric-card metric-success">
+              <div class="metric-icon">✓</div>
+              <div>
+                <p>Confirmados</p>
+                <strong id="confirmedCount">0</strong>
+                <span id="confirmedRate">0% do total</span>
+              </div>
+              <div class="progress"><i id="confirmedBar"></i></div>
+            </article>
+
+            <article class="metric-card metric-warning">
+              <div class="metric-icon">!</div>
+              <div>
+                <p>Pendentes</p>
+                <strong id="pendingCount">0</strong>
+                <span id="pendingRate">0% do total</span>
+              </div>
+              <div class="progress"><i id="pendingBar"></i></div>
+            </article>
+
+            <article class="metric-card metric-total">
+              <div class="metric-icon">☷</div>
+              <div>
+                <p>Total de inscritos</p>
+                <strong id="totalCount">0</strong>
+                <span>100% do total</span>
+              </div>
+            </article>
+          </section>
+        </div>
+      </section>
+
+      <section class="panel-card queue-card" aria-label="Fila de impressão" data-admin-panel="fila">
+        <div class="card-title">
+          <h2>Fila de impressão</h2>
+          <span id="printQueueUpdatedAt">Atualizando...</span>
+        </div>
+
+        <div class="queue-controls" aria-label="Controle de impressão">
+          <div class="queue-control-status">
+            <span class="queue-control-dot" aria-hidden="true"></span>
+            <span id="printingControlStatus">Verificando impressão...</span>
+          </div>
+          <div class="queue-control-actions">
+            <button id="startPrintingButton" class="queue-control-button is-start" type="button">
+              Iniciar
+            </button>
+            <button id="stopPrintingButton" class="queue-control-button is-stop" type="button">
+              Pausar
+            </button>
+          </div>
+        </div>
+
+        <div class="queue-metrics" aria-label="Resumo da fila">
+          <article class="queue-metric queue-metric-waiting">
+            <div class="queue-metric-icon queue-icon-clock" aria-hidden="true"></div>
+            <div>
+              <strong id="queueWaitingCount">0</strong>
+              <span>Aguardando</span>
+            </div>
+          </article>
+          <article class="queue-metric queue-metric-printing">
+            <div class="queue-metric-icon queue-icon-printer" aria-hidden="true"></div>
+            <div>
+              <strong id="queuePrintingCount">0</strong>
+              <span>Imprimindo</span>
+            </div>
+          </article>
+          <article class="queue-metric queue-metric-printed">
+            <div class="queue-metric-icon queue-icon-check" aria-hidden="true"></div>
+            <div>
+              <strong id="queuePrintedCount">0</strong>
+              <span>Impressos</span>
+            </div>
+          </article>
+          <article class="queue-metric queue-metric-error">
+            <div class="queue-metric-icon queue-icon-alert" aria-hidden="true"></div>
+            <div>
+              <strong id="queueErrorCount">0</strong>
+              <span>Erros</span>
+            </div>
+          </article>
+        </div>
+
+        <section class="queue-section" aria-label="Imprimindo agora">
+          <div class="queue-section-title">
+            <span class="queue-section-icon queue-icon-printer" aria-hidden="true"></span>
+            <h3>Imprimindo agora</h3>
+          </div>
+          <div id="printQueuePrintingList" class="queue-list"></div>
+        </section>
+
+        <section class="queue-section queue-next-section" aria-label="Próximos da fila">
+          <div class="queue-section-title">
+            <span class="queue-section-icon queue-icon-clock" aria-hidden="true"></span>
+            <h3>Próximos da fila</h3>
+          </div>
+          <div id="printQueueNextList" class="queue-list"></div>
+        </section>
+
+        <section class="queue-section" aria-label="Fila de espera">
+          <div class="queue-section-title">
+            <span class="queue-section-icon queue-icon-users" aria-hidden="true"></span>
+            <h3>Fila de espera</h3>
+          </div>
+          <div id="printQueueWaitingList" class="queue-list"></div>
+        </section>
+      </section>
+
+      <section class="panel-card print-test-card" aria-label="Teste de impressão" data-admin-panel="teste-impressao">
+        <div class="card-title">
+          <div>
+            <h2>Teste de impressão</h2>
+            <p>Simule o fluxo real com os participantes pendentes carregados.</p>
+          </div>
+          <span id="printTestUpdatedAt">Aguardando consulta</span>
+        </div>
+
+        <div class="print-test-config-grid" aria-label="Disponibilidade para o teste">
+          <article class="print-test-stat">
+            <span>Participantes pendentes</span>
+            <strong id="printTestPendingCount">0</strong>
+          </article>
+          <article class="print-test-stat">
+            <span>Balcões ativos</span>
+            <strong id="printTestPrinterCount">0</strong>
+          </article>
+        </div>
+
+        <div class="print-test-form">
+          <label for="printTestQuantity">
+            Quantidade para o teste
+            <input id="printTestQuantity" type="number" min="1" value="1" inputmode="numeric" />
+          </label>
+          <label for="printTestDelaySeconds">
+            Tempo por etiqueta (segundos)
+            <input id="printTestDelaySeconds" type="number" min="1" max="10" value="3" step="1" inputmode="numeric" />
+          </label>
+          <button id="startPrintTestButton" class="save-button" type="button">Iniciar teste</button>
+        </div>
+
+        <p class="print-test-warning">
+          Este teste confirma participantes pendentes e cria etiquetas como no fluxo real. A impressão será pausada automaticamente ao terminar.
+        </p>
+        <p id="printTestMessage" class="admin-message" role="status" aria-live="polite"></p>
+
+        <section class="print-test-progress" aria-label="Progresso do teste">
+          <div class="print-test-progress-title">
+            <strong id="printTestStatusText">Pronto para iniciar</strong>
+            <span id="printTestProgressText">0 de 0 processadas</span>
+          </div>
+          <div class="print-test-progress-track" aria-hidden="true">
+            <i id="printTestProgressBar"></i>
+          </div>
+          <div class="print-test-result-grid">
+            <span>Aguardando <strong id="printTestWaitingCount">0</strong></span>
+            <span>Imprimindo <strong id="printTestPrintingCount">0</strong></span>
+            <span>Impressas <strong id="printTestPrintedCount">0</strong></span>
+            <span>Erros <strong id="printTestErrorCount">0</strong></span>
+          </div>
+        </section>
+      </section>
+
+      <section class="reports-view" data-admin-panel="relatorios">
+        <section class="section-heading">
+          <h2>Relatórios</h2>
+          <span id="updatedAt">Atualizando...</span>
+        </section>
+
+        <section class="panel-card">
+          <div class="card-title">
+            <h2>Check-ins por hora</h2>
+            <span>Hoje</span>
+          </div>
+          <div class="chart-wrap">
+            <svg id="hourlyChart" viewBox="0 0 320 150" role="img" aria-label="Gráfico de check-ins por hora"></svg>
+          </div>
+        </section>
+
+        <section class="panel-card">
+          <div class="card-title">
+            <h2>Participantes por empresa</h2>
+            <span>100% dos inscritos</span>
+          </div>
+          <div id="companyList" class="company-list"></div>
+        </section>
+
+        <section class="panel-card recent-card">
+          <div class="card-title">
+            <h2>Entradas recentes</h2>
+            <a href="index.html">Check-in</a>
+          </div>
+          <div id="recentList" class="recent-list"></div>
+        </section>
+      </section>
+    </main>
+
+    <section id="printArea" class="print-area" aria-hidden="true">
+      <div class="label-card">
+        <p class="label-event">SAP Inside Track Fortaleza</p>
+        <div class="label-nameplate">
+          <h2 id="labelName">Nome do participante</h2>
+          <p id="labelCompany" class="label-company"></p>
+          <p class="label-number">Sorteio Nº <span id="labelNumber">000</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="uploadParticipantsModal" class="modal-backdrop" hidden>
+      <div class="upload-modal" role="dialog" aria-modal="true" aria-labelledby="uploadParticipantsTitle">
+        <div class="card-title">
+          <h2 id="uploadParticipantsTitle">Upload participantes</h2>
+          <button id="closeUploadParticipantsModal" class="modal-close" type="button" aria-label="Fechar">×</button>
+        </div>
+        <form id="uploadParticipantsForm" class="upload-form">
+          <label class="file-drop" for="participantsFileInput">
+            <strong id="participantsFileName">Selecionar arquivo CSV/XLSX</strong>
+            <span>Dados exportados do Sympla</span>
+          </label>
+          <input id="participantsFileInput" name="arquivo" type="file" accept=".csv,.xlsx" required />
+          <button id="submitParticipantsUpload" type="submit" class="save-button">Importar participantes</button>
+        </form>
+        <p id="uploadParticipantsMessage" class="admin-message" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <script src="admin.js?v=42"></script>
+  </body>
+</html>

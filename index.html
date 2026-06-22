@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Check-in do Evento</title>
+    <link rel="stylesheet" href="styles.css?v=2" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="checkin-panel" aria-labelledby="page-title">
+        <header class="hero">
+          <div class="status-pill" id="connectionStatus">Planilha</div>
+          <div class="brand-mark" aria-label="Check-in Evento 2026">
+            <div class="brand-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 7V4h8v3" />
+                <path d="M6 7h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" />
+                <path d="M9 12h6" />
+                <path d="M9 15h4" />
+                <path d="m16.5 14.5 1.4 1.4 3-3" />
+              </svg>
+            </div>
+            <div class="brand-text">
+              <span>Check-in</span>
+              <strong>Evento</strong>
+              <span>2026</span>
+            </div>
+          </div>
+          <div class="hero-copy">
+            <h1 id="page-title">Bem-vindo!</h1>
+            <p>Faça seu check-in para retirar seu crachá.</p>
+          </div>
+        </header>
+
+        <div class="form-card">
+          <form id="checkinForm" class="search-form" autocomplete="off">
+            <div class="field-group">
+              <div class="field-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 6h16v12H4z" />
+                  <path d="m4 7 8 6 8-6" />
+                </svg>
+              </div>
+              <div class="field-copy">
+                <label for="lookupInput">Email ou CPF</label>
+                <p>Informe o email ou CPF utilizado na inscrição.</p>
+                <input
+                  id="lookupInput"
+                  name="lookup"
+                  type="text"
+                  inputmode="email"
+                  placeholder="Digite seu email ou CPF"
+                  pattern="([^@\s]+@[^@\s]+\.[^@\s]+)|(\d{3}\.?\d{3}\.?\d{3}-?\d{2})"
+                  title="Digite um e-mail valido ou CPF como 451.462.704-82 ou 45146270482"
+                  aria-describedby="messageArea"
+                  autofocus
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="info-box">
+              <div class="info-icon" aria-hidden="true">i</div>
+              <div>
+                <strong>Importante</strong>
+                <p>O nome informado será o que aparecerá na sua etiqueta.</p>
+              </div>
+            </div>
+
+            <button type="submit" id="submitButton">
+              <span class="button-idle">Confirmar inscrição</span>
+              <span class="button-loading">Buscando</span>
+              <span class="button-arrow" aria-hidden="true">→</span>
+            </button>
+
+            <div class="field-group">
+              <div class="field-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="8" r="4" />
+                  <path d="M5 20a7 7 0 0 1 14 0" />
+                </svg>
+              </div>
+              <div class="field-copy">
+                <label for="badgeNameInput">Nome para o crachá</label>
+                <p>Informe o nome que deseja que seja impresso no seu crachá.</p>
+                <input
+                  id="badgeNameInput"
+                  name="badgeName"
+                  type="text"
+                  placeholder="Digite o nome para o crachá"
+                />
+              </div>
+            </div>
+
+            <div class="field-group">
+              <div class="field-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 21h18" />
+                  <path d="M5 21V7l8-4v18" />
+                  <path d="M19 21V11l-6-4" />
+                  <path d="M9 9h1" />
+                  <path d="M9 13h1" />
+                  <path d="M9 17h1" />
+                </svg>
+              </div>
+              <div class="field-copy">
+                <label for="companyInput">Empresa <span class="optional-label">opcional</span></label>
+                <p>Informe a empresa para aparecer na etiqueta.</p>
+                <input
+                  id="companyInput"
+                  name="company"
+                  type="text"
+                  placeholder="Digite a empresa"
+                />
+              </div>
+            </div>
+          </form>
+
+          <div id="messageArea" class="message" role="status" aria-live="polite"></div>
+
+          <section id="resultCard" class="result-card" hidden>
+            <div class="result-copy">
+              <div class="screen-label-card">
+                <p class="screen-label-event">SAP Inside Track Fortaleza</p>
+                <div class="screen-label-nameplate">
+                  <h2 id="participantName">Nome do participante</h2>
+                  <p id="participantCompany" class="company-line" hidden>Empresa</p>
+                  <p class="screen-label-number">
+                    Sorteio Nº <strong id="participantNumber">000</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button id="printButton" type="button" class="print-button">
+              Confirmar entrada e enviar para impressão
+            </button>
+          </section>
+          </div>
+      </section>
+    </main>
+
+    <section id="printArea" class="print-area" aria-hidden="true">
+      <div class="label-card">
+        <p class="label-event">SAP Inside Track Fortaleza</p>
+        <div class="label-nameplate">
+          <h2 id="labelName">Nome do participante</h2>
+          <p id="labelCompany" class="label-company"></p>
+          <p class="label-number">Sorteio Nº <span id="labelNumber">000</span></p>
+        </div>
+      </div>
+    </section>
+
+    <script src="app.js?v=25"></script>
+  </body>
+</html>

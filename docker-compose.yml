@@ -1,0 +1,42 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: controle-entrada-sit
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8020
+      TZ: America/Fortaleza
+    ports:
+      - "8020:8020"
+    volumes:
+      - ./participantes.db:/app/participantes.db
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8020/api?action=fonteDados', timeout=5).read()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  print-worker:
+    image: node:22-slim
+    container_name: controle-entrada-sit-print-worker
+    profiles:
+      - worker
+    working_dir: /app
+    command: ["node", "scripts/print-worker.js", "print-worker.config.docker.json"]
+    environment:
+      TZ: America/Fortaleza
+    volumes:
+      - ./:/app:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped

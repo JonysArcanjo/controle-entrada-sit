@@ -1,0 +1,20 @@
+{
+  "endpoint": "http://app:8020/api",
+  "pollIntervalMs": 1000,
+  "dryRun": true,
+  "dryRunDelayMs": 1000,
+  "printers": [
+    {
+      "name": "DOCKER_BALCAO_1",
+      "enabled": true
+    },
+    {
+      "name": "DOCKER_BALCAO_2",
+      "enabled": true
+    },
+    {
+      "name": "DOCKER_BALCAO_3",
+      "enabled": true
+    }
+  ]
+}
