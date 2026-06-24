@@ -1976,6 +1976,32 @@ input[type="file"] {
   color: #a15b00;
 }
 
+.system-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.system-status-actions a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #24467f;
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-decoration: none;
+}
+
+.system-status-actions a:hover {
+  border-color: #2d6cdf;
+  color: #1f5bc1;
+}
+
 .workbench {
   display: grid;
   gap: 12px;

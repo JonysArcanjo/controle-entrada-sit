@@ -52,6 +52,8 @@ class AdminAuthTests(unittest.TestCase):
 
     def test_admin_api_actions_and_upload_require_auth(self):
         self.assertTrue(make_handler("/admin/upload-participantes").request_requires_admin_auth())
+        self.assertTrue(make_handler("/admin/download-db").request_requires_admin_auth())
+        self.assertTrue(make_handler("/admin/download-backup").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=stats").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=setPrintingEnabled&enabled=true").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=limparIndicadores").request_requires_admin_auth())

@@ -49,3 +49,11 @@ test("admin shows system status with deploy metadata", () => {
   assert.match(styles, /\.system-status-card/);
   assert.match(styles, /\.system-status-grid/);
 });
+
+test("admin exposes protected database download links", () => {
+  assert.match(html, /href="admin\/download-db"/);
+  assert.match(html, /href="admin\/download-backup"/);
+  assert.match(html, /Baixar banco atual/);
+  assert.match(html, /Baixar ultimo backup/);
+  assert.match(styles, /\.system-status-actions/);
+});

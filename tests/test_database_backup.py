@@ -59,6 +59,22 @@ class DatabaseBackupTests(unittest.TestCase):
         self.assertTrue(created[3].exists())
         self.assertTrue(created[4].exists())
 
+    def test_resolve_admin_download_current_database(self):
+        download_path, filename = server.resolve_admin_download("db")
+
+        self.assertEqual(download_path, server.DB_PATH)
+        self.assertEqual(filename, "participantes.db")
+
+    def test_resolve_admin_download_latest_backup(self):
+        first = server.backup_database("deploy")
+        second = server.backup_database("upload")
+
+        download_path, filename = server.resolve_admin_download("backup")
+
+        self.assertEqual(download_path, second)
+        self.assertEqual(filename, second.name)
+        self.assertNotEqual(download_path, first)
+
 
 if __name__ == "__main__":
     unittest.main()

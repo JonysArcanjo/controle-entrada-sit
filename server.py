@@ -570,6 +570,28 @@ def prune_database_backups():
         backup.unlink()
 
 
+def resolve_admin_download(kind):
+    if kind == "db":
+        return DB_PATH, "participantes.db"
+
+    if kind == "backup":
+        if not BACKUP_DIR.exists():
+            return None, ""
+
+        backups = sorted(
+            (path for path in BACKUP_DIR.glob("participantes-*.db") if path.is_file()),
+            key=lambda path: path.name,
+            reverse=True,
+        )
+        if not backups:
+            return None, ""
+
+        latest = backups[0]
+        return latest, latest.name
+
+    return None, ""
+
+
 def has_participant_content(participant):
     identity_fields = ["email", "numero_ingresso", "nome", "sobrenome", "estado_pagamento"]
     return any(participant.get(field) for field in identity_fields)
@@ -1792,7 +1814,7 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
             return False
 
         path = self.request_path()
-        if path in ("/admin.html", "/admin/upload-participantes"):
+        if path in ("/admin.html", "/admin/upload-participantes", "/admin/download-db", "/admin/download-backup"):
             return True
 
         return path == "/api" and self.request_action() in ADMIN_API_ACTIONS
@@ -1854,7 +1876,29 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
             self.send_json({"ok": True, "message": "Envie um POST multipart com o campo arquivo."})
             return
 
+        if path == "/admin/download-db":
+            self.send_admin_download("db")
+            return
+
+        if path == "/admin/download-backup":
+            self.send_admin_download("backup")
+            return
+
         super().do_GET()
+
+    def send_admin_download(self, kind):
+        file_path, filename = resolve_admin_download(kind)
+        if not file_path or not file_path.exists() or not file_path.is_file():
+            self.send_error(404, "Arquivo de backup nao encontrado")
+            return
+
+        self.send_response(200)
+        self.send_header("Content-Type", "application/octet-stream")
+        self.send_header("Content-Length", str(file_path.stat().st_size))
+        self.send_header("Content-Disposition", f'attachment; filename="{filename}"')
+        self.end_headers()
+        with file_path.open("rb") as file_obj:
+            shutil.copyfileobj(file_obj, self.wfile)
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
