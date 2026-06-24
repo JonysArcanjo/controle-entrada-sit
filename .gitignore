@@ -1,6 +1,7 @@
 # Local data and participant information
 participantes.db
 participantes.db-*
+backups/
 *.db-wal
 *.db-shm
 load-test-participants.txt

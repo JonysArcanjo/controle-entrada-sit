@@ -8,6 +8,7 @@ import json
 import os
 import posixpath
 import re
+import shutil
 import sqlite3
 import sys
 import urllib.parse
@@ -23,6 +24,9 @@ from zoneinfo import ZoneInfo
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "participantes.db"
+BACKUP_DIR = Path(os.environ.get("BACKUP_DIR", BASE_DIR / "backups"))
+if not BACKUP_DIR.is_absolute():
+    BACKUP_DIR = BASE_DIR / BACKUP_DIR
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8020"))
 APP_TIMEZONE = os.environ.get("TZ", "America/Fortaleza")
@@ -493,6 +497,9 @@ def import_participants(records, headers):
         raise ValueError("O arquivo não possui registros para importar.")
 
     summary = {"processed": 0, "inserted": 0, "updated": 0, "errors": 0}
+    backup_path = backup_database("upload")
+    if backup_path:
+        summary["backup"] = str(backup_path)
 
     with get_connection() as conn:
         create_table(conn)
@@ -515,6 +522,21 @@ def import_participants(records, headers):
                 summary["errors"] += 1
 
     return summary
+
+
+def backup_database(reason="manual"):
+    if not DB_PATH.exists():
+        return None
+
+    safe_reason = re.sub(r"[^a-zA-Z0-9_-]+", "-", str(reason or "manual")).strip("-").lower()
+    if not safe_reason:
+        safe_reason = "manual"
+
+    timestamp = datetime.now(APP_TZ).strftime("%Y%m%d-%H%M%S-%f")
+    BACKUP_DIR.mkdir(parents=True, exist_ok=True)
+    backup_path = BACKUP_DIR / f"participantes-{safe_reason}-{timestamp}.db"
+    shutil.copy2(DB_PATH, backup_path)
+    return backup_path
 
 
 def has_participant_content(participant):

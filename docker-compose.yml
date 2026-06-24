@@ -9,10 +9,12 @@ services:
       TZ: America/Fortaleza
       ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      BACKUP_DIR: /app/backups
     ports:
       - "8020:8020"
     volumes:
       - ./participantes.db:/app/participantes.db
+      - ./backups:/app/backups
     restart: unless-stopped
     healthcheck:
       test:

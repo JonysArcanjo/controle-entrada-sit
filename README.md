@@ -46,7 +46,7 @@ http://127.0.0.1:8020/admin.html
 http://127.0.0.1:8020/fila.html
 ```
 
-O Compose publica a porta `8020` e monta `./participantes.db` em `/app/participantes.db`, mantendo os dados SQLite no arquivo local do projeto.
+O Compose publica a porta `8020`, monta `./participantes.db` em `/app/participantes.db` e monta `./backups` em `/app/backups`, mantendo dados e backups SQLite no host.
 O app e o worker sobem com `TZ=America/Fortaleza`.
 
 ## Protecao do admin
@@ -66,6 +66,17 @@ Continuam publicos:
 - `/api?action=lookup`
 - `/api?action=confirm`
 - `/api?action=printQueue`
+
+## Deploy na VPS
+
+Use o script de deploy para criar backup do SQLite antes do `git pull` e do rebuild:
+
+```bash
+cd /opt/sit-checkin
+ADMIN_USERNAME=admin ADMIN_PASSWORD='sit2026' ./scripts/deploy.sh
+```
+
+O script salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`.
 
 Para subir tambem o worker de impressao em modo simulado:
 
@@ -151,7 +162,7 @@ No painel admin (`admin.html`), use o botao:
 Upload participantes
 ```
 
-O upload aceita arquivos `.csv` e `.xlsx` exportados do Sympla. O servidor valida as colunas obrigatorias, cria ou atualiza registros em `participantes.db` e mostra um resumo com processados, novos, atualizados e erros.
+O upload aceita arquivos `.csv` e `.xlsx` exportados do Sympla. O servidor valida as colunas obrigatorias, cria um backup em `backups/`, cria ou atualiza registros em `participantes.db` e mostra um resumo com processados, novos, atualizados e erros.
 
 Colunas obrigatorias:
 
