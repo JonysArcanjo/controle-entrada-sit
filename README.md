@@ -175,7 +175,9 @@ No painel admin (`admin.html`), use o botao:
 Upload participantes
 ```
 
-O upload aceita arquivos `.csv` e `.xlsx` exportados do Sympla. O servidor valida as colunas obrigatorias, cria um backup em `backups/`, cria ou atualiza registros em `participantes.db` e mostra um resumo com processados, novos, atualizados e erros.
+O upload aceita arquivos `.csv` e `.xlsx` exportados do Sympla. O servidor valida as colunas obrigatorias, cria um backup em `backups/` e substitui a base de participantes em uma transacao SQLite. Se houver erro, a base anterior permanece intacta.
+
+Em upload valido, a importacao limpa participantes antigos, fila de impressao e lote de teste ativo, pausa a impressao e importa somente os participantes do novo arquivo.
 
 Colunas obrigatorias:
 

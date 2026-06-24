@@ -498,22 +498,36 @@ def import_participants(records, headers):
     if not records:
         raise ValueError("O arquivo não possui registros para importar.")
 
-    summary = {"processed": 0, "inserted": 0, "updated": 0, "errors": 0}
+    participants = []
+    for record in records:
+        if not any(str(value or "").strip() for value in record.values()):
+            continue
+
+        participant = map_record(record, header_map)
+        if not has_participant_content(participant):
+            continue
+
+        participants.append(participant)
+
+    if not participants:
+        raise ValueError("O arquivo não possui participantes válidos para importar.")
+
+    summary = {"processed": 0, "inserted": 0, "updated": 0, "errors": 0, "replaced": True}
     backup_path = backup_database("upload")
     if backup_path:
         summary["backup"] = str(backup_path)
 
     with get_connection() as conn:
-        create_table(conn)
+        criarTabelaParticipantesSQLite(conn)
+        criarTabelaFilaSQLite(conn)
+        criarTabelaConfiguracoesSQLite(conn)
+        conn.execute("DELETE FROM fila_impressao")
+        conn.execute("DELETE FROM participantes")
+        conn.execute("DELETE FROM sqlite_sequence WHERE name = 'participantes'")
+        set_config(conn, CONFIG_PRINTING_ENABLED, "false")
+        set_config(conn, CONFIG_ACTIVE_PRINT_TEST, "")
 
-        for record in records:
-            if not any(str(value or "").strip() for value in record.values()):
-                continue
-
-            participant = map_record(record, header_map)
-            if not has_participant_content(participant):
-                continue
-
+        for participant in participants:
             summary["processed"] += 1
             error = upsert_participant(conn, participant)
             if error == "inserted":
@@ -521,7 +535,7 @@ def import_participants(records, headers):
             elif error == "updated":
                 summary["updated"] += 1
             else:
-                summary["errors"] += 1
+                raise ValueError("Participante sem email ou número de ingresso não pode ser importado.")
 
     return summary
 
