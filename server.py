@@ -1658,10 +1658,18 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
+    def should_disable_cache(self):
+        path = urllib.parse.urlparse(getattr(self, "path", "")).path
+        return path == "/api" or path.endswith(".html") or path == "/"
+
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        if self.should_disable_cache():
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+            self.send_header("Pragma", "no-cache")
+            self.send_header("Expires", "0")
         super().end_headers()
 
     def do_OPTIONS(self):
