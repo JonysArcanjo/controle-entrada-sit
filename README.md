@@ -83,6 +83,14 @@ chmod 600 .env
 
 O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, executa `git pull origin main` e recria o app.
 
+Para conferir a versao publicada:
+
+```bash
+curl -sS 'https://SEU_HOST/api?action=version'
+```
+
+O endpoint retorna commit (`version`), horario do build, fonte ativa, se o admin auth esta ativo, existencia do banco e ultimo backup.
+
 Para subir tambem o worker de impressao em modo simulado:
 
 ```bash

@@ -33,6 +33,8 @@ APP_TIMEZONE = os.environ.get("TZ", "America/Fortaleza")
 APP_TZ = ZoneInfo(APP_TIMEZONE)
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
+APP_VERSION = os.environ.get("APP_VERSION", "dev")
+APP_BUILD_TIME = os.environ.get("APP_BUILD_TIME", "")
 GOOGLE_SHEETS_ENDPOINT = (
     "https://script.google.com/macros/s/"
     "AKfycbxBKdAhwsCb80_XeCz3NC1zN6txDxUj-cJQFcgbcGN6vdrsWJWLUgM41u0xlQHi40Pm/exec"
@@ -1582,6 +1584,42 @@ def get_google_sheets_endpoint():
         return get_config(conn, "google_sheets_endpoint", GOOGLE_SHEETS_ENDPOINT)
 
 
+def get_latest_backup_info():
+    if not BACKUP_DIR.exists():
+        return None, 0
+
+    backups = sorted(
+        (path for path in BACKUP_DIR.glob("participantes-*.db") if path.is_file()),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    if not backups:
+        return None, 0
+
+    latest = backups[0]
+    return {
+        "name": latest.name,
+        "sizeBytes": latest.stat().st_size,
+        "modifiedAt": datetime.fromtimestamp(latest.stat().st_mtime, APP_TZ).isoformat(timespec="seconds"),
+    }, len(backups)
+
+
+def getVersionInfo():
+    last_backup, backup_count = get_latest_backup_info()
+    return {
+        "ok": True,
+        "version": APP_VERSION,
+        "buildTime": APP_BUILD_TIME,
+        "timeZone": APP_TIMEZONE,
+        "fonteDadosAtiva": get_active_data_source(),
+        "adminAuthEnabled": bool(ADMIN_PASSWORD),
+        "databaseExists": DB_PATH.exists(),
+        "backupCount": backup_count,
+        "lastBackup": last_backup,
+        "updatedAt": datetime.now(APP_TZ).isoformat(timespec="seconds"),
+    }
+
+
 def should_proxy_to_google_sheets(action):
     local_actions = {
         "fonteDados",
@@ -1605,6 +1643,7 @@ def should_proxy_to_google_sheets(action):
         "printTestInfo",
         "startPrintTest",
         "printTestStatus",
+        "version",
     }
     return action not in local_actions and get_active_data_source() == FONTE_GOOGLE_SHEETS
 
@@ -1648,6 +1687,8 @@ def handle_api_action(params):
         return desativarGoogleSheets()
     if action in ("fonteDados", "getFonteDadosAtiva"):
         return getFonteDadosAtiva()
+    if action == "version":
+        return getVersionInfo()
     if action in ("lerRegistros", "participants"):
         return {"ok": True, "records": lerRegistros(int(params.get("limit", 1000)))}
     if action == "lookup":

@@ -27,3 +27,9 @@ test("deploy script loads local env file before requiring admin password", () =>
   assert.notEqual(passwordCheckIndex, -1);
   assert.ok(envIndex < passwordCheckIndex);
 });
+
+test("deploy script exports version metadata for compose", () => {
+  assert.match(script, /APP_VERSION=.*git rev-parse --short HEAD/);
+  assert.match(script, /APP_BUILD_TIME=.*date/);
+  assert.match(script, /export APP_VERSION APP_BUILD_TIME/);
+});

@@ -9,3 +9,8 @@ test("app service forwards admin auth environment variables", () => {
   assert.match(compose, /ADMIN_USERNAME:\s*\$\{ADMIN_USERNAME:-admin\}/);
   assert.match(compose, /ADMIN_PASSWORD:\s*\$\{ADMIN_PASSWORD:-\}/);
 });
+
+test("app service forwards deploy version environment variables", () => {
+  assert.match(compose, /APP_VERSION:\s*\$\{APP_VERSION:-dev\}/);
+  assert.match(compose, /APP_BUILD_TIME:\s*\$\{APP_BUILD_TIME:-\}/);
+});
