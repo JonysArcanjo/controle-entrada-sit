@@ -1,6 +1,5 @@
-const SHEETS_ENDPOINT =
-  "http://127.0.0.1:8020/api";
-const PARTICIPANTS_UPLOAD_ENDPOINT = "http://127.0.0.1:8020/admin/upload-participantes";
+const SHEETS_ENDPOINT = "/api";
+const PARTICIPANTS_UPLOAD_ENDPOINT = "/admin/upload-participantes";
 const PRINT_QUEUE_REFRESH_MS = 3000;
 const PRINT_TEST_REFRESH_MS = 1000;
 const APP_TIME_ZONE = "America/Fortaleza";

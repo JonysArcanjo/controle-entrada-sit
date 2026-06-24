@@ -1,4 +1,4 @@
-const SHEETS_ENDPOINT = "http://127.0.0.1:8020/api";
+const SHEETS_ENDPOINT = "/api";
 const PRINT_QUEUE_REFRESH_MS = 3000;
 const APP_TIME_ZONE = "America/Fortaleza";
 

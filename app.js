@@ -1,5 +1,4 @@
-const SHEETS_ENDPOINT =
-  "http://127.0.0.1:8020/api";
+const SHEETS_ENDPOINT = "/api";
 const APP_TIME_ZONE = "America/Fortaleza";
 
 const demoParticipants = [
