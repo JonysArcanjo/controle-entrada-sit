@@ -51,6 +51,7 @@ STATUS_CANCELADO = "cancelado"
 CONFIG_PRINT_PRINTERS = "fila_impressoras_ativas"
 CONFIG_PRINTING_ENABLED = "impressao_ativa"
 CONFIG_ACTIVE_PRINT_TEST = "teste_impressao_lote_ativo"
+CONFIG_SIMULATED_WORKER_ENABLED = "worker_simulado_vps_ativo"
 ADMIN_API_ACTIONS = {
     "ativarSQLite",
     "activateSqlite",
@@ -69,6 +70,7 @@ ADMIN_API_ACTIONS = {
     "startPrintTest",
     "printTestStatus",
     "setPrintingEnabled",
+    "setSimulatedWorkerEnabled",
     "iniciarImpressaoFila",
     "pararImpressaoFila",
     "adicionarItemFila",
@@ -1386,6 +1388,8 @@ def claimPrintJob(printer):
         conn.commit()
         if not is_printing_enabled(conn):
             return {"ok": True, "job": None, "printingEnabled": False}
+        if is_simulated_worker_printer(printer) and not is_simulated_worker_enabled(conn):
+            return {"ok": True, "job": None, "simulatedWorkerEnabled": False}
         conn.execute("BEGIN IMMEDIATE")
         job = obterProximoDaFila(conn)
         if not job:
@@ -1406,6 +1410,23 @@ def failPrintJob(job_id, printer="", error_message=""):
 
 def is_printing_enabled(conn):
     return get_config(conn, CONFIG_PRINTING_ENABLED, "true") == "true"
+
+
+def is_simulated_worker_printer(printer):
+    return str(printer or "").strip().upper().startswith("DOCKER_BALCAO_")
+
+
+def is_simulated_worker_enabled(conn):
+    return get_config(conn, CONFIG_SIMULATED_WORKER_ENABLED, "true") == "true"
+
+
+def setSimulatedWorkerEnabled(enabled):
+    enabled = str(enabled).strip().lower() in ("1", "true", "sim", "yes", "on", "ativar", "enable")
+    with get_connection() as conn:
+        criarTabelaConfiguracoesSQLite(conn)
+        set_config(conn, CONFIG_SIMULATED_WORKER_ENABLED, "true" if enabled else "false")
+
+    return {"ok": True, "simulatedWorkerEnabled": enabled}
 
 
 def setPrintingEnabled(enabled):
@@ -1514,6 +1535,7 @@ def getPrintQueueStats(limit=20):
         criarTabelaFilaSQLite(conn)
         printers = get_print_printers(conn)
         printing_enabled = is_printing_enabled(conn)
+        simulated_worker_enabled = is_simulated_worker_enabled(conn)
         counts = dict(
             conn.execute(
                 "SELECT status, COUNT(*) FROM fila_impressao GROUP BY status"
@@ -1546,6 +1568,7 @@ def getPrintQueueStats(limit=20):
         "erro": counts.get(STATUS_ERRO, 0),
         "cancelado": counts.get(STATUS_CANCELADO, 0),
         "printingEnabled": printing_enabled,
+        "simulatedWorkerEnabled": simulated_worker_enabled,
         "printers": printers,
         "printerCount": len(printers),
         "jobs": jobs,
@@ -1675,6 +1698,8 @@ def get_latest_backup_info():
 
 def getVersionInfo():
     last_backup, backup_count = get_latest_backup_info()
+    with get_connection() as conn:
+        simulated_worker_enabled = is_simulated_worker_enabled(conn)
     return {
         "ok": True,
         "version": APP_VERSION,
@@ -1683,6 +1708,7 @@ def getVersionInfo():
         "fonteDadosAtiva": get_active_data_source(),
         "adminAuthEnabled": bool(ADMIN_PASSWORD),
         "databaseExists": DB_PATH.exists(),
+        "simulatedWorkerEnabled": simulated_worker_enabled,
         "backupCount": backup_count,
         "lastBackup": last_backup,
         "updatedAt": datetime.now(APP_TZ).isoformat(timespec="seconds"),
@@ -1714,6 +1740,7 @@ def should_proxy_to_google_sheets(action):
         "printTestStatus",
         "version",
         "createBackup",
+        "setSimulatedWorkerEnabled",
     }
     return action not in local_actions and get_active_data_source() == FONTE_GOOGLE_SHEETS
 
@@ -1761,6 +1788,8 @@ def handle_api_action(params):
         return getVersionInfo()
     if action == "createBackup":
         return create_manual_backup()
+    if action == "setSimulatedWorkerEnabled":
+        return setSimulatedWorkerEnabled(params.get("enabled", "true"))
     if action in ("lerRegistros", "participants"):
         return {"ok": True, "records": lerRegistros(int(params.get("limit", 1000)))}
     if action == "lookup":

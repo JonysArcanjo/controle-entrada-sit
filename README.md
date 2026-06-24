@@ -370,6 +370,8 @@ O worker sempre chama `/api` da aplicacao. Ele nao deve apontar diretamente para
 
 Use `dryRun: false` apenas no computador conectado as impressoras reais. O nome de cada impressora deve ser exatamente o retornado pelo sistema operacional.
 
+Na VPS, o worker Docker de simulacao fica ativo por padrao para testes. Quando quiser validar ou operar usando o worker do PC conectado as impressoras, abra o admin em `Fonte e upload` e clique em `Pausar simulacao VPS`; assim os balcoes `DOCKER_BALCAO_*` nao pegam novos itens da fila. Para voltar a simular pela VPS, clique em `Ativar simulacao VPS`.
+
 3. Rode:
 
 ```bash

@@ -136,6 +136,32 @@ class PrintTestBatchTests(unittest.TestCase):
             delay = conn.execute("SELECT atraso_simulado_ms FROM fila_impressao").fetchone()[0]
         self.assertEqual(delay, 10000)
 
+    def test_simulated_vps_worker_is_enabled_by_default(self):
+        with server.get_connection() as conn:
+            self.assertTrue(server.is_simulated_worker_enabled(conn))
+
+    def test_disabled_simulated_vps_worker_does_not_claim_jobs(self):
+        server.setSimulatedWorkerEnabled("false")
+        server.adicionarItemFila(participante_email="simulado@test.local", nome_cracha="Simulado")
+        server.setPrintingEnabled("true")
+
+        simulated = server.claimPrintJob("DOCKER_BALCAO_1")
+        real_pc = server.claimPrintJob("PC_BALCAO_1")
+
+        self.assertTrue(simulated["ok"])
+        self.assertIsNone(simulated["job"])
+        self.assertFalse(simulated["simulatedWorkerEnabled"])
+        self.assertIsNotNone(real_pc["job"])
+        self.assertEqual(real_pc["job"]["printer"], "PC_BALCAO_1")
+
+    def test_set_simulated_worker_enabled_updates_version_info(self):
+        disabled = server.handle_api_action({"action": "setSimulatedWorkerEnabled", "enabled": "false"})
+        info = server.getVersionInfo()
+
+        self.assertTrue(disabled["ok"])
+        self.assertFalse(disabled["simulatedWorkerEnabled"])
+        self.assertFalse(info["simulatedWorkerEnabled"])
+
 
 if __name__ == "__main__":
     unittest.main()

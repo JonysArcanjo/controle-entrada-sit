@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Evento</title>
-    <link rel="stylesheet" href="admin.css?v=38" />
+    <link rel="stylesheet" href="admin.css?v=39" />
   </head>
   <body>
     <aside class="admin-sidebar" aria-label="Navegação do admin">
@@ -108,6 +108,10 @@
             <span>Impressão</span>
             <strong id="systemPrintingStatus">--</strong>
           </div>
+          <div>
+            <span>Simulação VPS</span>
+            <strong id="simulatedWorkerStatus">--</strong>
+          </div>
           <div class="system-status-wide">
             <span>Backups</span>
             <strong id="systemLastBackup">--</strong>
@@ -115,6 +119,8 @@
         </div>
         <div class="system-status-actions" aria-label="Downloads administrativos">
           <button id="createBackupButton" type="button">Criar backup agora</button>
+          <button id="enableSimulatedWorkerButton" type="button">Ativar simulação VPS</button>
+          <button id="disableSimulatedWorkerButton" type="button">Pausar simulação VPS</button>
           <a href="admin/download-db">Baixar banco atual</a>
           <a href="admin/download-backup">Baixar ultimo backup</a>
         </div>
@@ -409,6 +415,6 @@
       </div>
     </section>
 
-    <script src="admin.js?v=45"></script>
+    <script src="admin.js?v=46"></script>
   </body>
 </html>

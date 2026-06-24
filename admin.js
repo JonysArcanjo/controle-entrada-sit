@@ -50,9 +50,12 @@ const els = {
   systemAdminAuth: document.querySelector("#systemAdminAuth"),
   systemDatabase: document.querySelector("#systemDatabase"),
   systemPrintingStatus: document.querySelector("#systemPrintingStatus"),
+  simulatedWorkerStatus: document.querySelector("#simulatedWorkerStatus"),
   systemLastBackup: document.querySelector("#systemLastBackup"),
   createBackupButton: document.querySelector("#createBackupButton"),
   createBackupStatus: document.querySelector("#createBackupStatus"),
+  enableSimulatedWorkerButton: document.querySelector("#enableSimulatedWorkerButton"),
+  disableSimulatedWorkerButton: document.querySelector("#disableSimulatedWorkerButton"),
   uploadParticipantsButton: document.querySelector("#uploadParticipantsButton"),
   uploadParticipantsStatus: document.querySelector("#uploadParticipantsStatus"),
   uploadParticipantsModal: document.querySelector("#uploadParticipantsModal"),
@@ -183,6 +186,10 @@ async function getSystemStatus() {
 
 async function createManualBackup() {
   return jsonp({ action: "createBackup" });
+}
+
+async function setSimulatedWorkerEnabled(enabled) {
+  return jsonp({ action: "setSimulatedWorkerEnabled", enabled: String(Boolean(enabled)) });
 }
 
 async function startPrintTest(quantity, delaySeconds) {
@@ -617,6 +624,18 @@ function renderSystemPrintingStatus(isEnabled) {
   els.systemPrintingStatus.classList.toggle("is-paused", !isEnabled);
 }
 
+function renderSimulatedWorkerControl(isEnabled) {
+  if (!els.simulatedWorkerStatus) {
+    return;
+  }
+
+  els.simulatedWorkerStatus.textContent = isEnabled ? "Ativa" : "Pausada";
+  els.simulatedWorkerStatus.classList.toggle("is-ok", isEnabled);
+  els.simulatedWorkerStatus.classList.toggle("is-paused", !isEnabled);
+  els.enableSimulatedWorkerButton.disabled = isEnabled;
+  els.disableSimulatedWorkerButton.disabled = !isEnabled;
+}
+
 function renderSystemStatus(status) {
   if (!status || !status.ok) {
     throw new Error((status && status.error) || "Nao foi possivel carregar o status.");
@@ -627,6 +646,7 @@ function renderSystemStatus(status) {
   els.systemDataSource.textContent = status.fonteDadosAtiva || "--";
   els.systemAdminAuth.textContent = status.adminAuthEnabled ? "Protegido" : "Aberto";
   els.systemDatabase.textContent = status.databaseExists ? "Encontrado" : "Ausente";
+  renderSimulatedWorkerControl(status.simulatedWorkerEnabled !== false);
   els.systemLastBackup.textContent = status.lastBackup
     ? `${status.backupCount || 0} backup(s) - ${status.lastBackup.name}`
     : `${status.backupCount || 0} backup(s)`;
@@ -1039,6 +1059,34 @@ els.createBackupButton.addEventListener("click", async () => {
     els.createBackupButton.disabled = false;
   }
 });
+
+async function changeSimulatedWorkerEnabled(enabled) {
+  els.enableSimulatedWorkerButton.disabled = true;
+  els.disableSimulatedWorkerButton.disabled = true;
+  els.createBackupStatus.textContent = enabled
+    ? "Ativando simulação VPS..."
+    : "Pausando simulação VPS...";
+
+  try {
+    const result = await setSimulatedWorkerEnabled(enabled);
+    if (!result || !result.ok) {
+      throw new Error((result && result.error) || "Falha ao alterar simulação VPS.");
+    }
+
+    renderSimulatedWorkerControl(result.simulatedWorkerEnabled);
+    els.createBackupStatus.textContent = result.simulatedWorkerEnabled
+      ? "Simulação VPS ativa."
+      : "Simulação VPS pausada. O worker do PC pode consumir a fila.";
+    loadSystemStatus();
+    loadPrintQueueStats();
+  } catch (error) {
+    els.createBackupStatus.textContent = error.message || "Falha ao alterar simulação VPS.";
+    loadSystemStatus();
+  }
+}
+
+els.enableSimulatedWorkerButton.addEventListener("click", () => changeSimulatedWorkerEnabled(true));
+els.disableSimulatedWorkerButton.addEventListener("click", () => changeSimulatedWorkerEnabled(false));
 
 els.adminBadgeNameInput.addEventListener("input", () => {
   updateAdminLabelPreview();

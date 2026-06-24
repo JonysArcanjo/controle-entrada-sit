@@ -65,3 +65,12 @@ test("admin exposes manual backup action", () => {
   assert.match(script, /action:\s*"createBackup"/);
   assert.match(script, /createManualBackup/);
 });
+
+test("admin exposes simulated VPS worker control", () => {
+  assert.match(html, /id="simulatedWorkerStatus"/);
+  assert.match(html, /id="enableSimulatedWorkerButton"/);
+  assert.match(html, /id="disableSimulatedWorkerButton"/);
+  assert.match(html, /Simulação VPS/);
+  assert.match(script, /action:\s*"setSimulatedWorkerEnabled"/);
+  assert.match(script, /renderSimulatedWorkerControl/);
+});
