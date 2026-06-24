@@ -1930,6 +1930,52 @@ input[type="file"] {
   line-height: 1.2;
 }
 
+.system-status-card {
+  display: grid;
+  gap: 14px;
+}
+
+.system-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.system-status-grid > div {
+  display: grid;
+  gap: 4px;
+  min-height: 68px;
+  padding: 12px;
+  border: 1px solid #e6ebf5;
+  border-radius: 12px;
+  background: #f8faff;
+}
+
+.system-status-grid span {
+  color: #68708a;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.system-status-grid strong {
+  overflow-wrap: anywhere;
+  color: #101832;
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.system-status-wide {
+  grid-column: 1 / -1;
+}
+
+.system-status-grid .is-ok {
+  color: #10834a;
+}
+
+.system-status-grid .is-paused {
+  color: #a15b00;
+}
+
 .workbench {
   display: grid;
   gap: 12px;
@@ -2049,6 +2095,7 @@ input[type="file"] {
   }
 
   .operations-card,
+  .system-status-card,
   .participant-admin,
   .queue-card {
     margin-right: -2px;

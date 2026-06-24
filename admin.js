@@ -43,6 +43,14 @@ const els = {
   googleSheetsSourceButton: document.querySelector("#googleSheetsSourceButton"),
   sqliteSourceButton: document.querySelector("#sqliteSourceButton"),
   dataSourceStatus: document.querySelector("#dataSourceStatus"),
+  systemStatusUpdatedAt: document.querySelector("#systemStatusUpdatedAt"),
+  systemVersion: document.querySelector("#systemVersion"),
+  systemBuildTime: document.querySelector("#systemBuildTime"),
+  systemDataSource: document.querySelector("#systemDataSource"),
+  systemAdminAuth: document.querySelector("#systemAdminAuth"),
+  systemDatabase: document.querySelector("#systemDatabase"),
+  systemPrintingStatus: document.querySelector("#systemPrintingStatus"),
+  systemLastBackup: document.querySelector("#systemLastBackup"),
   uploadParticipantsButton: document.querySelector("#uploadParticipantsButton"),
   uploadParticipantsStatus: document.querySelector("#uploadParticipantsStatus"),
   uploadParticipantsModal: document.querySelector("#uploadParticipantsModal"),
@@ -165,6 +173,10 @@ async function getPrintQueueStats() {
 
 async function getPrintTestInfo() {
   return jsonp({ action: "printTestInfo" });
+}
+
+async function getSystemStatus() {
+  return jsonp({ action: "version" });
 }
 
 async function startPrintTest(quantity, delaySeconds) {
@@ -556,6 +568,7 @@ function renderPrintQueueStats(stats) {
     })
   }`;
   renderPrintingControl(stats.printingEnabled !== false);
+  renderSystemPrintingStatus(stats.printingEnabled !== false);
   renderPrintQueueList(stats.jobs || []);
 }
 
@@ -567,6 +580,51 @@ function renderPrintingControl(isEnabled) {
   els.printingControlStatus.textContent = isEnabled
     ? "Impressao ativa"
     : "Impressao pausada";
+}
+
+function formatSystemDate(value) {
+  if (!value) {
+    return "--";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleString("pt-BR", {
+    timeZone: APP_TIME_ZONE,
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function renderSystemPrintingStatus(isEnabled) {
+  if (!els.systemPrintingStatus) {
+    return;
+  }
+
+  els.systemPrintingStatus.textContent = isEnabled ? "Ativa" : "Pausada";
+  els.systemPrintingStatus.classList.toggle("is-ok", isEnabled);
+  els.systemPrintingStatus.classList.toggle("is-paused", !isEnabled);
+}
+
+function renderSystemStatus(status) {
+  if (!status || !status.ok) {
+    throw new Error((status && status.error) || "Nao foi possivel carregar o status.");
+  }
+
+  els.systemVersion.textContent = status.version || "dev";
+  els.systemBuildTime.textContent = formatSystemDate(status.buildTime);
+  els.systemDataSource.textContent = status.fonteDadosAtiva || "--";
+  els.systemAdminAuth.textContent = status.adminAuthEnabled ? "Protegido" : "Aberto";
+  els.systemDatabase.textContent = status.databaseExists ? "Encontrado" : "Ausente";
+  els.systemLastBackup.textContent = status.lastBackup
+    ? `${status.backupCount || 0} backup(s) - ${status.lastBackup.name}`
+    : `${status.backupCount || 0} backup(s)`;
+  els.systemStatusUpdatedAt.textContent = `Atualizado ${formatSystemDate(status.updatedAt)}`;
 }
 
 function renderHourlyChart(values) {
@@ -761,6 +819,18 @@ async function loadFonteDadosAtiva() {
   }
 }
 
+async function loadSystemStatus() {
+  if (!els.systemStatusUpdatedAt) {
+    return;
+  }
+
+  try {
+    renderSystemStatus(await getSystemStatus());
+  } catch (error) {
+    els.systemStatusUpdatedAt.textContent = error.message || "Falha ao atualizar";
+  }
+}
+
 function renderDataSource(fonte) {
   const isSqlite = fonte === "SQLITE";
   els.sqliteSourceButton.classList.toggle("is-active", isSqlite);
@@ -780,6 +850,7 @@ els.refreshButton.addEventListener("click", () => {
   loadStats();
   loadPrintQueueStats();
   loadFonteDadosAtiva();
+  loadSystemStatus();
   if (currentAdminView === "teste-impressao") {
     loadPrintTestInfo();
   }
@@ -788,12 +859,14 @@ els.refreshButton.addEventListener("click", () => {
 window.addEventListener("focus", () => {
   loadStats();
   loadPrintQueueStats();
+  loadSystemStatus();
 });
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) {
     loadStats();
     loadPrintQueueStats();
+    loadSystemStatus();
   }
 });
 
@@ -811,6 +884,7 @@ async function changeDataSource(fonte) {
     renderDataSource(result.fonteDadosAtiva);
     loadStats();
     loadPrintQueueStats();
+    loadSystemStatus();
   } catch (error) {
     els.dataSourceStatus.textContent = error.message || "Falha ao alterar fonte.";
   } finally {
@@ -1019,6 +1093,7 @@ els.adminConfirmButton.addEventListener("click", async () => {
     );
     loadStats();
     loadPrintQueueStats();
+    loadSystemStatus();
   } catch (error) {
     setAdminMessage(error.message || "Nao foi possivel concluir a acao.", "error");
     els.adminConfirmButton.disabled = false;
@@ -1044,4 +1119,6 @@ setAdminView("checkin");
 loadStats();
 loadPrintQueueStats();
 loadFonteDadosAtiva();
+loadSystemStatus();
 window.setInterval(loadPrintQueueStats, PRINT_QUEUE_REFRESH_MS);
+window.setInterval(loadSystemStatus, PRINT_QUEUE_REFRESH_MS);

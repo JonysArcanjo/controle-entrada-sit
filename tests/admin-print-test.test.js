@@ -35,3 +35,17 @@ test("print test panel has responsive component styles", () => {
 test("company report identifies full participant coverage", () => {
   assert.match(html, /Participantes por empresa[\s\S]*100% dos inscritos/);
 });
+
+test("admin shows system status with deploy metadata", () => {
+  assert.match(html, /Status do sistema/);
+  assert.match(html, /id="systemVersion"/);
+  assert.match(html, /id="systemBuildTime"/);
+  assert.match(html, /id="systemDataSource"/);
+  assert.match(html, /id="systemAdminAuth"/);
+  assert.match(html, /id="systemLastBackup"/);
+  assert.match(html, /id="systemPrintingStatus"/);
+  assert.match(script, /action:\s*"version"/);
+  assert.match(script, /renderSystemStatus/);
+  assert.match(styles, /\.system-status-card/);
+  assert.match(styles, /\.system-status-grid/);
+});

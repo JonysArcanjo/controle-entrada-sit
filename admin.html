@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Evento</title>
-    <link rel="stylesheet" href="admin.css?v=35" />
+    <link rel="stylesheet" href="admin.css?v=36" />
   </head>
   <body>
     <aside class="admin-sidebar" aria-label="Navegação do admin">
@@ -76,6 +76,43 @@
         <span id="uploadParticipantsStatus">Importe CSV/XLSX exportado do Sympla</span>
         <button id="clearDashboardButton" type="button" class="danger-button">Limpar indicadores</button>
         <span id="clearDashboardStatus">Remove inscritos importados e zera a fila</span>
+      </section>
+
+      <section class="panel-card system-status-card" aria-label="Status do sistema" data-admin-panel="dados">
+        <div class="card-title">
+          <h2>Status do sistema</h2>
+          <span id="systemStatusUpdatedAt">Atualizando...</span>
+        </div>
+        <div class="system-status-grid">
+          <div>
+            <span>Versão</span>
+            <strong id="systemVersion">--</strong>
+          </div>
+          <div>
+            <span>Build</span>
+            <strong id="systemBuildTime">--</strong>
+          </div>
+          <div>
+            <span>Fonte</span>
+            <strong id="systemDataSource">--</strong>
+          </div>
+          <div>
+            <span>Admin</span>
+            <strong id="systemAdminAuth">--</strong>
+          </div>
+          <div>
+            <span>Banco</span>
+            <strong id="systemDatabase">--</strong>
+          </div>
+          <div>
+            <span>Impressão</span>
+            <strong id="systemPrintingStatus">--</strong>
+          </div>
+          <div class="system-status-wide">
+            <span>Backups</span>
+            <strong id="systemLastBackup">--</strong>
+          </div>
+        </div>
       </section>
 
       <section class="workbench" data-admin-panel="checkin">
@@ -366,6 +403,6 @@
       </div>
     </section>
 
-    <script src="admin.js?v=43"></script>
+    <script src="admin.js?v=44"></script>
   </body>
 </html>
