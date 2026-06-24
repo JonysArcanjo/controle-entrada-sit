@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
+import base64
 import cgi
 import csv
+import hmac
 import io
 import json
 import os
@@ -25,6 +27,8 @@ HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8020"))
 APP_TIMEZONE = os.environ.get("TZ", "America/Fortaleza")
 APP_TZ = ZoneInfo(APP_TIMEZONE)
+ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")
 GOOGLE_SHEETS_ENDPOINT = (
     "https://script.google.com/macros/s/"
     "AKfycbxBKdAhwsCb80_XeCz3NC1zN6txDxUj-cJQFcgbcGN6vdrsWJWLUgM41u0xlQHi40Pm/exec"
@@ -40,6 +44,27 @@ STATUS_CANCELADO = "cancelado"
 CONFIG_PRINT_PRINTERS = "fila_impressoras_ativas"
 CONFIG_PRINTING_ENABLED = "impressao_ativa"
 CONFIG_ACTIVE_PRINT_TEST = "teste_impressao_lote_ativo"
+ADMIN_API_ACTIONS = {
+    "ativarSQLite",
+    "activateSqlite",
+    "ativarGoogleSheets",
+    "activateGoogleSheets",
+    "setFonteDadosAtiva",
+    "desativarGoogleSheets",
+    "lerRegistros",
+    "participants",
+    "reimprimirEtiqueta",
+    "reprintLabel",
+    "limparIndicadores",
+    "stats",
+    "printTestInfo",
+    "startPrintTest",
+    "printTestStatus",
+    "setPrintingEnabled",
+    "iniciarImpressaoFila",
+    "pararImpressaoFila",
+    "adicionarItemFila",
+}
 
 DB_COLUMNS = [
     "ordem_inscricao",
@@ -1658,9 +1683,55 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(BASE_DIR), **kwargs)
 
+    def request_path(self):
+        return urllib.parse.urlparse(getattr(self, "path", "")).path
+
+    def request_action(self):
+        query = urllib.parse.urlparse(getattr(self, "path", "")).query
+        params = urllib.parse.parse_qs(query)
+        return str(params.get("action", ["fonteDados"])[-1]).strip()
+
     def should_disable_cache(self):
-        path = urllib.parse.urlparse(getattr(self, "path", "")).path
+        path = self.request_path()
         return path == "/api" or path.endswith(".html") or path == "/"
+
+    def request_requires_admin_auth(self):
+        if not ADMIN_PASSWORD:
+            return False
+
+        path = self.request_path()
+        if path in ("/admin.html", "/admin/upload-participantes"):
+            return True
+
+        return path == "/api" and self.request_action() in ADMIN_API_ACTIONS
+
+    def is_admin_authorized(self):
+        if not self.request_requires_admin_auth():
+            return True
+
+        authorization = self.headers.get("Authorization", "")
+        if not authorization.startswith("Basic "):
+            return False
+
+        try:
+            raw_credentials = base64.b64decode(authorization[6:], validate=True).decode("utf-8")
+        except Exception:
+            return False
+
+        username, separator, password = raw_credentials.partition(":")
+        if not separator:
+            return False
+
+        return hmac.compare_digest(username, ADMIN_USERNAME) and hmac.compare_digest(password, ADMIN_PASSWORD)
+
+    def reject_admin_auth(self):
+        body = json.dumps({"ok": False, "error": "Autenticação administrativa requerida."}, ensure_ascii=False).encode("utf-8")
+        self.send_response(401)
+        self.send_header("WWW-Authenticate", 'Basic realm="SIT Admin"')
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
 
     def end_headers(self):
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -1679,6 +1750,10 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         path = self.path.split("?", 1)[0]
 
+        if not self.is_admin_authorized():
+            self.reject_admin_auth()
+            return
+
         if path == "/api":
             self.handle_api_get()
             return
@@ -1691,6 +1766,10 @@ class AdminRequestHandler(SimpleHTTPRequestHandler):
 
     def do_POST(self):
         path = self.path.split("?", 1)[0]
+
+        if not self.is_admin_authorized():
+            self.reject_admin_auth()
+            return
 
         if path == "/api":
             self.handle_api_post()

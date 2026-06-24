@@ -26,7 +26,7 @@ http://localhost:8020/fila.html
 
 O servidor local cria/usa o banco SQLite `participantes.db` e habilita o upload de participantes no painel admin.
 
-Se o navegador mostrar uma versao antiga, use `Cmd + Shift + R`. Os arquivos CSS/JS usam query string de cache, como `app.js?v=25`, `admin.js?v=40` e `fila.js?v=4`.
+Se o navegador mostrar uma versao antiga, use `Cmd + Shift + R`. Os arquivos CSS/JS usam query string de cache, como `app.js?v=26`, `admin.js?v=43` e `fila.js?v=5`.
 
 O fuso horario da aplicacao e `America/Fortaleza`.
 
@@ -48,6 +48,24 @@ http://127.0.0.1:8020/fila.html
 
 O Compose publica a porta `8020` e monta `./participantes.db` em `/app/participantes.db`, mantendo os dados SQLite no arquivo local do projeto.
 O app e o worker sobem com `TZ=America/Fortaleza`.
+
+## Protecao do admin
+
+O painel `admin.html`, o upload de participantes e as acoes administrativas da API podem ser protegidos por Basic Auth. A protecao fica ativa quando `ADMIN_PASSWORD` e definido:
+
+```bash
+ADMIN_USERNAME=admin ADMIN_PASSWORD='troque-esta-senha' docker compose up -d --build app
+```
+
+Sem `ADMIN_PASSWORD`, o admin permanece aberto para facilitar desenvolvimento local. Em VPS publica, defina sempre `ADMIN_PASSWORD`.
+
+Continuam publicos:
+
+- `index.html`
+- `fila.html`
+- `/api?action=lookup`
+- `/api?action=confirm`
+- `/api?action=printQueue`
 
 Para subir tambem o worker de impressao em modo simulado:
 
