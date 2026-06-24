@@ -18,3 +18,12 @@ test("deploy script requires admin password for protected production deploy", ()
   assert.match(script, /ADMIN_PASSWORD/);
   assert.match(script, /docker compose up -d --build app/);
 });
+
+test("deploy script loads local env file before requiring admin password", () => {
+  const envIndex = script.indexOf(". ./.env");
+  const passwordCheckIndex = script.indexOf('if [ -z "${ADMIN_PASSWORD:-}" ]');
+
+  assert.notEqual(envIndex, -1);
+  assert.notEqual(passwordCheckIndex, -1);
+  assert.ok(envIndex < passwordCheckIndex);
+});

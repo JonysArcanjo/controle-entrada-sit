@@ -73,10 +73,15 @@ Use o script de deploy para criar backup do SQLite antes do `git pull` e do rebu
 
 ```bash
 cd /opt/sit-checkin
-ADMIN_USERNAME=admin ADMIN_PASSWORD='sit2026' ./scripts/deploy.sh
+cat > .env <<'EOF'
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=sit2026
+EOF
+chmod 600 .env
+./scripts/deploy.sh
 ```
 
-O script salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`.
+O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, executa `git pull origin main` e recria o app.
 
 Para subir tambem o worker de impressao em modo simulado:
 
