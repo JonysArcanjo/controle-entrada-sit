@@ -1982,7 +1982,8 @@ input[type="file"] {
   gap: 8px;
 }
 
-.system-status-actions a {
+.system-status-actions a,
+.system-status-actions button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1992,14 +1993,28 @@ input[type="file"] {
   border-radius: 8px;
   background: #ffffff;
   color: #24467f;
+  cursor: pointer;
   font-size: 0.78rem;
   font-weight: 850;
+  font-family: inherit;
   text-decoration: none;
 }
 
-.system-status-actions a:hover {
+.system-status-actions a:hover,
+.system-status-actions button:hover {
   border-color: #2d6cdf;
   color: #1f5bc1;
+}
+
+.system-status-actions button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.system-status-note {
+  color: #68708a;
+  font-size: 0.78rem;
+  font-weight: 750;
 }
 
 .workbench {

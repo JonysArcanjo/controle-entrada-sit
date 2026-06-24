@@ -75,6 +75,21 @@ class DatabaseBackupTests(unittest.TestCase):
         self.assertEqual(filename, second.name)
         self.assertNotEqual(download_path, first)
 
+    def test_create_backup_action_creates_manual_backup(self):
+        with server.get_connection() as conn:
+            conn.execute("INSERT INTO participantes (nome, email) VALUES (?, ?)", ("Ana", "ana@test.local"))
+
+        result = server.handle_api_action({"action": "createBackup"})
+
+        self.assertTrue(result["ok"])
+        self.assertEqual(result["backupCount"], 1)
+        self.assertIn("participantes-manual-", result["backup"]["name"])
+        backup_path = server.BACKUP_DIR / result["backup"]["name"]
+        self.assertTrue(backup_path.exists())
+        with sqlite3.connect(backup_path) as conn:
+            row = conn.execute("SELECT nome, email FROM participantes").fetchone()
+        self.assertEqual(row, ("Ana", "ana@test.local"))
+
 
 if __name__ == "__main__":
     unittest.main()

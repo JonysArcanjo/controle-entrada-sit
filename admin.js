@@ -51,6 +51,8 @@ const els = {
   systemDatabase: document.querySelector("#systemDatabase"),
   systemPrintingStatus: document.querySelector("#systemPrintingStatus"),
   systemLastBackup: document.querySelector("#systemLastBackup"),
+  createBackupButton: document.querySelector("#createBackupButton"),
+  createBackupStatus: document.querySelector("#createBackupStatus"),
   uploadParticipantsButton: document.querySelector("#uploadParticipantsButton"),
   uploadParticipantsStatus: document.querySelector("#uploadParticipantsStatus"),
   uploadParticipantsModal: document.querySelector("#uploadParticipantsModal"),
@@ -177,6 +179,10 @@ async function getPrintTestInfo() {
 
 async function getSystemStatus() {
   return jsonp({ action: "version" });
+}
+
+async function createManualBackup() {
+  return jsonp({ action: "createBackup" });
 }
 
 async function startPrintTest(quantity, delaySeconds) {
@@ -1012,6 +1018,26 @@ els.uploadParticipantsModal.addEventListener("click", (event) => {
 els.participantsFileInput.addEventListener("change", () => {
   const file = els.participantsFileInput.files[0];
   els.participantsFileName.textContent = file ? file.name : "Selecionar arquivo CSV/XLSX";
+});
+
+els.createBackupButton.addEventListener("click", async () => {
+  els.createBackupButton.disabled = true;
+  els.createBackupStatus.textContent = "Criando backup...";
+
+  try {
+    const result = await createManualBackup();
+    if (!result || !result.ok) {
+      throw new Error((result && result.error) || "Falha ao criar backup.");
+    }
+
+    const backupName = result.backup && result.backup.name ? result.backup.name : "backup criado";
+    els.createBackupStatus.textContent = `Backup criado: ${backupName}`;
+    loadSystemStatus();
+  } catch (error) {
+    els.createBackupStatus.textContent = error.message || "Falha ao criar backup.";
+  } finally {
+    els.createBackupButton.disabled = false;
+  }
 });
 
 els.adminBadgeNameInput.addEventListener("input", () => {

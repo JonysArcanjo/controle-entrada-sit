@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Painel do Evento</title>
-    <link rel="stylesheet" href="admin.css?v=37" />
+    <link rel="stylesheet" href="admin.css?v=38" />
   </head>
   <body>
     <aside class="admin-sidebar" aria-label="Navegação do admin">
@@ -114,9 +114,11 @@
           </div>
         </div>
         <div class="system-status-actions" aria-label="Downloads administrativos">
+          <button id="createBackupButton" type="button">Criar backup agora</button>
           <a href="admin/download-db">Baixar banco atual</a>
           <a href="admin/download-backup">Baixar ultimo backup</a>
         </div>
+        <span id="createBackupStatus" class="system-status-note"></span>
       </section>
 
       <section class="workbench" data-admin-panel="checkin">
@@ -407,6 +409,6 @@
       </div>
     </section>
 
-    <script src="admin.js?v=44"></script>
+    <script src="admin.js?v=45"></script>
   </body>
 </html>

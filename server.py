@@ -63,6 +63,7 @@ ADMIN_API_ACTIONS = {
     "reimprimirEtiqueta",
     "reprintLabel",
     "limparIndicadores",
+    "createBackup",
     "stats",
     "printTestInfo",
     "startPrintTest",
@@ -590,6 +591,23 @@ def resolve_admin_download(kind):
         return latest, latest.name
 
     return None, ""
+
+
+def create_manual_backup():
+    backup_path = backup_database("manual")
+    if not backup_path:
+        return {"ok": False, "error": "Banco SQLite ainda nao existe para backup."}
+
+    latest_backup, backup_count = get_latest_backup_info()
+    return {
+        "ok": True,
+        "backup": latest_backup or {
+            "name": backup_path.name,
+            "sizeBytes": backup_path.stat().st_size,
+            "modifiedAt": datetime.fromtimestamp(backup_path.stat().st_mtime, APP_TZ).isoformat(timespec="seconds"),
+        },
+        "backupCount": backup_count,
+    }
 
 
 def has_participant_content(participant):
@@ -1695,6 +1713,7 @@ def should_proxy_to_google_sheets(action):
         "startPrintTest",
         "printTestStatus",
         "version",
+        "createBackup",
     }
     return action not in local_actions and get_active_data_source() == FONTE_GOOGLE_SHEETS
 
@@ -1740,6 +1759,8 @@ def handle_api_action(params):
         return getFonteDadosAtiva()
     if action == "version":
         return getVersionInfo()
+    if action == "createBackup":
+        return create_manual_backup()
     if action in ("lerRegistros", "participants"):
         return {"ok": True, "records": lerRegistros(int(params.get("limit", 1000)))}
     if action == "lookup":

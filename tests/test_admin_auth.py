@@ -55,6 +55,7 @@ class AdminAuthTests(unittest.TestCase):
         self.assertTrue(make_handler("/admin/download-db").request_requires_admin_auth())
         self.assertTrue(make_handler("/admin/download-backup").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=stats").request_requires_admin_auth())
+        self.assertTrue(make_handler("/api?action=createBackup").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=setPrintingEnabled&enabled=true").request_requires_admin_auth())
         self.assertTrue(make_handler("/api?action=limparIndicadores").request_requires_admin_auth())
 

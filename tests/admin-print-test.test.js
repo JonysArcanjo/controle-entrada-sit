@@ -57,3 +57,11 @@ test("admin exposes protected database download links", () => {
   assert.match(html, /Baixar ultimo backup/);
   assert.match(styles, /\.system-status-actions/);
 });
+
+test("admin exposes manual backup action", () => {
+  assert.match(html, /id="createBackupButton"/);
+  assert.match(html, /Criar backup agora/);
+  assert.match(html, /id="createBackupStatus"/);
+  assert.match(script, /action:\s*"createBackup"/);
+  assert.match(script, /createManualBackup/);
+});
