@@ -17,6 +17,7 @@ if [ -z "${ADMIN_PASSWORD:-}" ]; then
 fi
 
 BACKUP_DIR="${BACKUP_DIR:-$PROJECT_DIR/backups}"
+BACKUP_RETENTION="${BACKUP_RETENTION:-30}"
 
 mkdir -p "$BACKUP_DIR"
 
@@ -27,6 +28,8 @@ if [ -f participantes.db ]; then
 else
   echo "participantes.db ainda nao existe; seguindo sem backup."
 fi
+
+ls -1t "$BACKUP_DIR"/participantes-*.db 2>/dev/null | awk "NR > $BACKUP_RETENTION" | xargs -r rm -f
 
 git pull origin main
 APP_VERSION="$(git rev-parse --short HEAD)"

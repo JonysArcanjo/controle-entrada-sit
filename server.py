@@ -27,6 +27,7 @@ DB_PATH = BASE_DIR / "participantes.db"
 BACKUP_DIR = Path(os.environ.get("BACKUP_DIR", BASE_DIR / "backups"))
 if not BACKUP_DIR.is_absolute():
     BACKUP_DIR = BASE_DIR / BACKUP_DIR
+BACKUP_RETENTION = max(1, int(os.environ.get("BACKUP_RETENTION", "30")))
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8020"))
 APP_TIMEZONE = os.environ.get("TZ", "America/Fortaleza")
@@ -552,7 +553,21 @@ def backup_database(reason="manual"):
     BACKUP_DIR.mkdir(parents=True, exist_ok=True)
     backup_path = BACKUP_DIR / f"participantes-{safe_reason}-{timestamp}.db"
     shutil.copy2(DB_PATH, backup_path)
+    prune_database_backups()
     return backup_path
+
+
+def prune_database_backups():
+    if not BACKUP_DIR.exists():
+        return
+
+    backups = sorted(
+        (path for path in BACKUP_DIR.glob("participantes-*.db") if path.is_file()),
+        key=lambda path: path.name,
+        reverse=True,
+    )
+    for backup in backups[BACKUP_RETENTION:]:
+        backup.unlink()
 
 
 def has_participant_content(participant):
@@ -1604,7 +1619,7 @@ def get_latest_backup_info():
 
     backups = sorted(
         (path for path in BACKUP_DIR.glob("participantes-*.db") if path.is_file()),
-        key=lambda path: path.stat().st_mtime,
+        key=lambda path: path.name,
         reverse=True,
     )
     if not backups:

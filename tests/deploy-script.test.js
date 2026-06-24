@@ -33,3 +33,9 @@ test("deploy script exports version metadata for compose", () => {
   assert.match(script, /APP_BUILD_TIME=.*date/);
   assert.match(script, /export APP_VERSION APP_BUILD_TIME/);
 });
+
+test("deploy script prunes old backups using backup retention", () => {
+  assert.match(script, /BACKUP_RETENTION/);
+  assert.match(script, /ls -1t "\$BACKUP_DIR"\/participantes-\*\.db/);
+  assert.match(script, /rm -f/);
+});

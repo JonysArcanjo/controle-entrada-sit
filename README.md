@@ -76,12 +76,13 @@ cd /opt/sit-checkin
 cat > .env <<'EOF'
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=sit2026
+BACKUP_RETENTION=30
 EOF
 chmod 600 .env
 ./scripts/deploy.sh
 ```
 
-O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, executa `git pull origin main` e recria o app.
+O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, remove backups antigos acima de `BACKUP_RETENTION`, executa `git pull origin main` e recria o app.
 
 Para conferir a versao publicada:
 
@@ -178,6 +179,7 @@ Upload participantes
 O upload aceita arquivos `.csv` e `.xlsx` exportados do Sympla. O servidor valida as colunas obrigatorias, cria um backup em `backups/` e substitui a base de participantes em uma transacao SQLite. Se houver erro, a base anterior permanece intacta.
 
 Em upload valido, a importacao limpa participantes antigos, fila de impressao e lote de teste ativo, pausa a impressao e importa somente os participantes do novo arquivo.
+Por padrao, sao mantidos os 30 backups mais recentes; ajuste com `BACKUP_RETENTION`.
 
 Colunas obrigatorias:
 
