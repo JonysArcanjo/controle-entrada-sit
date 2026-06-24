@@ -82,7 +82,7 @@ chmod 600 .env
 ./scripts/deploy.sh
 ```
 
-O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, remove backups antigos acima de `BACKUP_RETENTION`, executa `git pull origin main` e recria o app.
+O script carrega `.env`, salva `participantes.db` em `backups/participantes-deploy-YYYYMMDD-HHMMSS.db`, remove backups antigos acima de `BACKUP_RETENTION`, executa `git pull origin main` e recria o app junto com o `print-worker`.
 
 Para conferir a versao publicada:
 

@@ -16,6 +16,7 @@ const configPath =
   requestedConfigPath ||
   (fs.existsSync(defaultConfigPath) ? defaultConfigPath : fallbackConfigPath);
 const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
+const SYNC_PRINTERS_INTERVAL_MS = Number(config.syncPrintersIntervalMs || 10000);
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -200,6 +201,7 @@ async function main() {
 
   console.log(`Print worker iniciado.${config.dryRun ? " Modo dry-run ativo." : ""}`);
   await syncPrintPrinters();
+  setInterval(syncPrintPrinters, SYNC_PRINTERS_INTERVAL_MS);
 
   await Promise.all(getEnabledPrinters().map((printer) => runPrinterLoop(printer)));
 }

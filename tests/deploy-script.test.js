@@ -16,7 +16,11 @@ test("deploy script backs up sqlite database before pulling code", () => {
 
 test("deploy script requires admin password for protected production deploy", () => {
   assert.match(script, /ADMIN_PASSWORD/);
-  assert.match(script, /docker compose up -d --build app/);
+  assert.match(script, /docker compose --profile worker up -d --build --force-recreate app print-worker/);
+});
+
+test("deploy script recreates the print worker with the app", () => {
+  assert.match(script, /docker compose --profile worker up -d --build --force-recreate app print-worker/);
 });
 
 test("deploy script loads local env file before requiring admin password", () => {

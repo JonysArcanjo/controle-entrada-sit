@@ -35,4 +35,4 @@ git pull origin main
 APP_VERSION="$(git rev-parse --short HEAD)"
 APP_BUILD_TIME="$(date -Iseconds)"
 export APP_VERSION APP_BUILD_TIME
-ADMIN_USERNAME="${ADMIN_USERNAME:-admin}" ADMIN_PASSWORD="$ADMIN_PASSWORD" docker compose up -d --build app
+ADMIN_USERNAME="${ADMIN_USERNAME:-admin}" ADMIN_PASSWORD="$ADMIN_PASSWORD" docker compose --profile worker up -d --build --force-recreate app print-worker
